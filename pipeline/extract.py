@@ -35,6 +35,11 @@ def download_file(
     started = time.monotonic()
     last_error: Exception | None = None
 
+    if dest.exists():
+        remote_size = _remote_size(url, timeout)
+        if remote_size is not None and dest.stat().st_size == remote_size:
+            return _finish(dest, started)  # already complete; skip the download
+
     for attempt in range(1, attempts + 1):
         existing = dest.stat().st_size if dest.exists() else 0
         headers = {"User-Agent": USER_AGENT}
@@ -67,6 +72,17 @@ def download_file(
     raise DownloadError(
         f"Failed to download {url} after {attempts} attempts: {last_error}"
     ) from last_error
+
+
+def _remote_size(url: str, timeout: float) -> int | None:
+    """Content-Length from a HEAD request, or None if unavailable."""
+    req = urllib.request.Request(url, headers={"User-Agent": USER_AGENT}, method="HEAD")
+    try:
+        with urllib.request.urlopen(req, timeout=timeout) as resp:
+            length = resp.headers.get("Content-Length")
+            return int(length) if length else None
+    except Exception:  # noqa: BLE001 — fall back to the Range download path
+        return None
 
 
 def _finish(dest: Path, started: float) -> tuple[Path, str, int]:

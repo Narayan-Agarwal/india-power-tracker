@@ -154,18 +154,25 @@ through silently).
 ## D9. Tolerances and freshness threshold
 
 **What:** "sources sum to totals" is checked within **0.5 %** relative
-tolerance; the freshness check requires the newest month in the data to be
-within **4 months** of the run date.
+tolerance. The freshness check is a **regression guard**: a newly loaded file
+must not have a newest month older than the previous file's, and the absolute
+staleness (newest month vs run date) is measured and reported on every run
+(in run_log details and on the app's health page) rather than used as a
+pass/fail threshold.
 
-**Why:** Ember's fuel rows and aggregate rows disagree by rounding in some
-state-months (verified during development — exact numbers in
-PROGRESS.md/README results); 0.5 % separates rounding from real breakage.
-The 4-month freshness bound reflects the observed publication lag (monthly
-updates with ~2-3 month delay behind the newest calendar month) while still
-failing the run if Ember stops publishing.
+**Why:** verified against the live file on 2026-10-05: fuel rows sum to the
+publisher's `Total Generation` / `Total emissions` rows to ~1e-16 relative
+(zero rows over 0.5 %), so 0.5 % separates rounding from real breakage. For
+freshness, an absolute "newest month must be within N months of today" check
+would fail permanently whenever Ember pauses publishing (their page reported
+"Last Updated: January 16, 2026" while the newest data month is 2025-11 — an
+11-month calendar lag that is the publisher's, not the pipeline's). Failing
+every scheduled run while the publisher is quiet would be noise, not signal;
+the regression guard still catches a genuinely bad or truncated file.
 
-**Alternatives:** absolute tolerances in GWh (breaks across state sizes);
-hard-fail on any mismatch (fires on publisher rounding).
+**Alternatives:** absolute staleness threshold with a big N (meaningless);
+no freshness check at all (the task requires one; the regression guard plus
+the reported lag is the honest version).
 
 ## D10. Two databases, same code path
 
@@ -254,3 +261,19 @@ real data; logic-level violations (sums that don't add up) must be loud.
 **Alternatives:** fail the run on any reject (one blank cell would block all
 fresh data); ignore rejects (silent data loss — explicitly forbidden by the
 task).
+
+## D16. Two runtime bugs found by verification, and their fixes
+
+Both were caught by actually running things, which is why the task's
+"verify everything" rule exists:
+
+1. **SQLAlchemy + psycopg 3.** `create_engine("postgresql://...")` silently
+   selects the psycopg2 dialect → `ModuleNotFoundError: No module named
+   'psycopg2'` at first query (caught by the AppTest suite). Fix: the app
+   rewrites `postgresql://` / `postgres://` to `postgresql+psycopg://`.
+2. **Silent full re-download.** `files.ember-energy.org` sometimes ignores
+   the `Range` header and returns 200 with the whole 23 MB file at ~20 KB/s,
+   so a "resume" could re-download for 20 minutes (this stalled the first
+   test runs). Fix: a HEAD request compares Content-Length with the local
+   file size first; a complete file skips the download entirely (verified:
+   0.9 s vs ~20 minutes).

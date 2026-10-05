@@ -69,7 +69,4 @@ def target_kwargs(target: str) -> dict:
 # --- Pipeline knobs ---------------------------------------------------------
 # Tolerance for "sources sum to totals" checks, as a fraction of the total.
 SUM_TOLERANCE_FRACTION = 0.005  # 0.5%
-# Freshness: the newest month in the data must be at least this close to the
-# run date (in months) for the freshness check to pass. Ember publishes with a
-# lag; if they stop publishing entirely this fails the run.
-FRESHNESS_MAX_LAG_MONTHS = 4
+# (Freshness is a regression guard plus a reported lag — see DECISIONS.md D9.)

@@ -43,6 +43,13 @@ def main(argv: list[str] | None = None) -> int:
     if args.command == "app":
         from streamlit.web import cli as stcli
 
+        from pipeline.config import database_url
+
+        # The app resolves secrets -> NEON_DATABASE_URL -> DATABASE_URL; make
+        # --target select the database by exporting the right env var (never
+        # printed, never logged).
+        env_var = "NEON_DATABASE_URL" if args.target == "neon" else "DATABASE_URL"
+        os.environ.setdefault(env_var, database_url(args.target))
         os.environ["IPT_APP_TARGET"] = args.target
         app_path = REPO_ROOT / "app" / "streamlit_app.py"
         sys.exit(
