@@ -1,0 +1,8 @@
+# Runtime dependencies for the Streamlit app ONLY (used by Streamlit Community Cloud).
+# Pipeline dependencies live in requirements-pipeline.txt.
+
+streamlit==1.49.1
+pandas==2.3.3
+SQLAlchemy==2.0.43
+psycopg[binary]==3.2.10
+altair==5.5.0

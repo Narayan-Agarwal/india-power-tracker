@@ -1,0 +1,8 @@
+# Dependencies for the data pipeline and the test suite.
+# The Streamlit app's own runtime dependencies are in requirements.txt.
+
+-r requirements.txt
+psycopg[binary]==3.2.10
+python-dotenv==1.0.1
+pandas==2.3.3
+pytest==8.4.2

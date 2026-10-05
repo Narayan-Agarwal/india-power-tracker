@@ -1,0 +1,27 @@
+# Secrets — never commit
+.env
+.streamlit/secrets.toml
+
+# Local-only working files
+PROGRESS.md
+INTERVIEW_NOTES.md
+
+# Data files (downloaded source data and scratch)
+data/
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+*.egg-info/
+.pytest_cache/
+.coverage
+
+# Editors / OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Streamlit local cache
+.streamlit/cache/
