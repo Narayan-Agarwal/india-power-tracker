@@ -15,15 +15,15 @@ REPO_ROOT = Path(__file__).resolve().parent.parent
 load_dotenv(REPO_ROOT / ".env")
 
 # --- Dataset identity -------------------------------------------------------
-# Verified against ember-climate.org (see DECISIONS.md for what was checked).
+# Verified against ember-energy.org on 2026-10-05 (see DECISIONS.md D1/D2):
+# the download link labelled "India monthly electricity data – long format
+# (CSV)" on https://ember-energy.org/data/india-electricity-data
 DATASET_NAME = "Ember India electricity data (state-level, monthly)"
-DATASET_PAGE_URL = "https://ember-energy.org/data/tools-and-services/india-electricity-data/"
-DATASET_LICENCE = "CC BY 4.0 (as stated by Ember on the dataset page)"
-# The exact download URL the pipeline fetches is set after verification; it is
-# logged in DECISIONS.md and used verbatim by the extractor.
+DATASET_PAGE_URL = "https://ember-energy.org/data/india-electricity-data"
+DATASET_LICENCE = "CC BY 4.0 (as stated by Ember: 'All content is released under a Creative Commons Attribution Licence (CC-BY-4.0).')"
 DATASET_URL = os.environ.get(
     "EMBER_DATASET_URL",
-    "https://ember-energy.org/app/uploads/india-monthly-electricity-data.csv",
+    "https://files.ember-energy.org/public-downloads/india_monthly_full_release_long_format.csv",
 )
 
 # --- Paths ------------------------------------------------------------------
